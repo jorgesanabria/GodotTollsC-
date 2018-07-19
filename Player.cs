@@ -58,6 +58,7 @@ public class Player : KinematicBody2D
         });
         _fsm.Add(PlayerState.OnAir, (current, delta) =>
         {
+            if (_wallTime > 0) return current;
             var horizontal = Vector2.Zero;
             if (Input.IsActionPressed("ui_left"))
             {
@@ -112,6 +113,28 @@ public class Player : KinematicBody2D
             }
             return current;
         });
+        _fsm.Add(PlayerState.OnLeftWall, (current, delta) =>
+        {
+            if (Input.IsActionPressed("ui_up"))
+            {
+                var jump = new Vector2(WallJumpHorizontalForce, -JumpForce);
+                GlobalVelocity = jump;
+                _wallTime = WallTime;
+                return PlayerState.OnAir;
+            }
+            return current;
+        });
+        _fsm.Add(PlayerState.OnRightWall, (current, delta) =>
+        {
+            if (Input.IsActionPressed("ui_up"))
+            {
+                var jump = new Vector2(WallJumpHorizontalForce * -1, -JumpForce);
+                GlobalVelocity = jump;
+                _wallTime = WallTime;
+                return PlayerState.OnAir;
+            }
+            return current;
+        });
     }
 
     private Vector2 _getCollisionNormal()
@@ -125,5 +148,6 @@ public class Player : KinematicBody2D
     {
         _fsm.Tick(delta);
         GlobalVelocity = MoveAndSlide(GlobalVelocity, FloorNormal);
+        _wallTime = Mathf.Clamp(_wallTime - delta, 0, 10);
     }
 }

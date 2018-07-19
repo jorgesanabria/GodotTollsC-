@@ -73,6 +73,6 @@ FloorNormal = Vector2( 0, -1 )
 HorizontalSpeed = 300.0
 JumpForce = 300.0
 WallJumpHorizontalForce = 50.0
-WallTime = 0.5
+WallTime = 0.2
 
 
