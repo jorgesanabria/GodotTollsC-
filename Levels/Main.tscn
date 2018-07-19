@@ -1,0 +1,78 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Levels/Player.tscn" type="PackedScene" id=1]
+
+[sub_resource type="RectangleShape2D" id=1]
+
+custom_solver_bias = 0.0
+extents = Vector2( 469, 10 )
+
+[sub_resource type="RectangleShape2D" id=2]
+
+custom_solver_bias = 0.0
+extents = Vector2( 10, 343.637 )
+
+[node name="Main" type="Node2D" index="0"]
+
+position = Vector2( 160.817, 340.451 )
+
+[node name="Suelo" type="StaticBody2D" parent="." index="0"]
+
+editor/display_folded = true
+position = Vector2( 325, 224 )
+input_pickable = false
+collision_layer = 1
+collision_mask = 1
+constant_linear_velocity = Vector2( 0, 0 )
+constant_angular_velocity = 0.0
+friction = 1.0
+bounce = 0.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Suelo" index="0"]
+
+shape = SubResource( 1 )
+
+[node name="Pared" type="StaticBody2D" parent="." index="1"]
+
+editor/display_folded = true
+position = Vector2( -109.362, -73.907 )
+input_pickable = false
+collision_layer = 1
+collision_mask = 1
+constant_linear_velocity = Vector2( 0, 0 )
+constant_angular_velocity = 0.0
+friction = 1.0
+bounce = 0.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pared" index="0"]
+
+shape = SubResource( 2 )
+
+[node name="Pared2" type="StaticBody2D" parent="." index="2"]
+
+editor/display_folded = true
+position = Vector2( 771.536, -70.8161 )
+input_pickable = false
+collision_layer = 1
+collision_mask = 1
+constant_linear_velocity = Vector2( 0, 0 )
+constant_angular_velocity = 0.0
+friction = 1.0
+bounce = 0.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pared2" index="0"]
+
+shape = SubResource( 2 )
+
+[node name="Player" parent="." index="3" instance=ExtResource( 1 )]
+
+position = Vector2( 317.18, -73.4526 )
+GravityVector = Vector2( 0, 9.8 )
+GlobalVelocity = Vector2( 0, 0 )
+FloorNormal = Vector2( 0, -1 )
+HorizontalSpeed = 300.0
+JumpForce = 300.0
+WallJumpHorizontalForce = 50.0
+WallTime = 0.5
+
+
