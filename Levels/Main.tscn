@@ -71,7 +71,7 @@ GravityVector = Vector2( 0, 9.8 )
 GlobalVelocity = Vector2( 0, 0 )
 FloorNormal = Vector2( 0, -1 )
 HorizontalSpeed = 300.0
-JumpForce = 300.0
+JumpForce = 500.0
 WallJumpHorizontalForce = 50.0
 WallTime = 0.2
 

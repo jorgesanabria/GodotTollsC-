@@ -115,7 +115,7 @@ public class Player : KinematicBody2D
         });
         _fsm.Add(PlayerState.OnLeftWall, (current, delta) =>
         {
-            if (Input.IsActionPressed("ui_up"))
+            if (Input.IsActionJustPressed("ui_up"))
             {
                 var jump = new Vector2(WallJumpHorizontalForce, -JumpForce);
                 GlobalVelocity = jump;
@@ -126,7 +126,7 @@ public class Player : KinematicBody2D
         });
         _fsm.Add(PlayerState.OnRightWall, (current, delta) =>
         {
-            if (Input.IsActionPressed("ui_up"))
+            if (Input.IsActionJustPressed("ui_up"))
             {
                 var jump = new Vector2(WallJumpHorizontalForce * -1, -JumpForce);
                 GlobalVelocity = jump;

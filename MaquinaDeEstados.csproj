@@ -49,6 +49,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FSM\FiniteStateMachine.cs" />
     <Compile Include="FSM\Fsm.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PlayerState.cs" />
