@@ -1,6 +1,9 @@
 using Godot;
+using MaquinaDeEstados;
 using MaquinaDeEstados.FSM;
+using MaquinaDeEstados.InputHandler;
 using System;
+using System.Collections.Generic;
 
 public class Player : KinematicBody2D
 {
@@ -19,11 +22,23 @@ public class Player : KinematicBody2D
     private float _wallTime = 0f;
     [Export]
     public float WallTime = 0.5f;
-    protected Fsm<PlayerState> _fsm;
+    protected FiniteStateMachine<PlayerState, Player> _fsm;
+    protected InputHandler<InputActions, string> _input;
     public override void _Ready()
     {
-        _fsm = new Fsm<PlayerState> { Initial = PlayerState.OnAir };
-        _fsm.Add(PlayerState.OnAir, (current, delta) =>
+        _input = new InputHandler<InputActions, string>(
+            map: new Dictionary<InputActions, string>
+            {
+                { InputActions.MoveLeft, "ui_left" },
+                { InputActions.MoveRight, "ui_right" },
+                { InputActions.Jump, "ui_up" }
+            },
+            actionJustPressed: Input.IsActionJustPressed,
+            actionPressed: Input.IsActionPressed,
+            actionReleased: Input.IsActionJustReleased
+        );
+        _fsm = new FiniteStateMachine<PlayerState, Player>(equalizer: (current, captured) => current == captured) { InitialState = PlayerState.OnAir };
+        _fsm.Add(PlayerState.OnAir, (current, player) =>
         {
             if (!IsOnFloor() && !IsOnWall())
             {
@@ -32,9 +47,9 @@ public class Player : KinematicBody2D
             }
             return IsOnFloor() && !IsOnWall() ? PlayerState.OnGround : current;
         });
-        _fsm.Add(PlayerState.OnGround, (current, delta) =>
+        _fsm.Add(PlayerState.OnGround, (current, player) =>
         {
-            if (Input.IsActionPressed("ui_up"))
+            if (_input.IsActionPressed(InputActions.Jump))
             {
                 var jump = new Vector2(GlobalVelocity.x, -JumpForce);
                 GlobalVelocity = jump;
@@ -42,37 +57,37 @@ public class Player : KinematicBody2D
             }
             return current;
         });
-        _fsm.Add(PlayerState.OnGround, (current, delta) =>
+        _fsm.Add(PlayerState.OnGround, (current, player) =>
         {
             var horizontal = Vector2.Zero;
-            if (Input.IsActionPressed("ui_left"))
+            if (_input.IsActionPressed(InputActions.MoveLeft))
             {
                 horizontal = new Vector2((-1 * HorizontalSpeed), GlobalVelocity.y);
             }
-            if (Input.IsActionPressed("ui_right"))
+            if (_input.IsActionPressed(InputActions.MoveRight))
             {
                 horizontal = new Vector2((HorizontalSpeed), GlobalVelocity.y);
             }
             GlobalVelocity = horizontal;
             return current;
         });
-        _fsm.Add(PlayerState.OnAir, (current, delta) =>
+        _fsm.Add(PlayerState.OnAir, (current, player) =>
         {
             if (_wallTime > 0) return current;
             var horizontal = Vector2.Zero;
-            if (Input.IsActionPressed("ui_left"))
+            if (_input.IsActionPressed(InputActions.MoveLeft))
             {
                 horizontal = new Vector2((-1 * HorizontalSpeed), GlobalVelocity.y);
                 GlobalVelocity = horizontal;
             }
-            if (Input.IsActionPressed("ui_right"))
+            if (_input.IsActionPressed(InputActions.MoveRight))
             {
                 horizontal = new Vector2((HorizontalSpeed), GlobalVelocity.y);
                 GlobalVelocity = horizontal;
             }
             return current;
         });
-        _fsm.Add(PlayerState.OnAir, (current, delta) =>
+        _fsm.Add(PlayerState.OnAir, (current, player) =>
         {
             if (IsOnFloor())
             {
@@ -81,7 +96,7 @@ public class Player : KinematicBody2D
             }
             return current;
         });
-        _fsm.Add(PlayerState.OnAir, (current, delta) =>
+        _fsm.Add(PlayerState.OnAir, (current, player) =>
         {
             if (IsOnWall())
             {
@@ -95,7 +110,7 @@ public class Player : KinematicBody2D
         _fsm.Add(PlayerState.OnRightWall, (current, delta) => IsOnFloor() ? PlayerState.OnGround : current);
         _fsm.Add(PlayerState.OnLeftWall, (current, delta) =>
         {
-            if (Input.IsActionPressed("ui_right"))
+            if (_input.IsActionPressed(InputActions.MoveRight))
             {
                 var jump = new Vector2(HorizontalSpeed, -JumpForce);
                 GlobalVelocity = jump;
@@ -103,9 +118,9 @@ public class Player : KinematicBody2D
             }
             return current;
         });
-        _fsm.Add(PlayerState.OnRightWall, (current, delta) =>
+        _fsm.Add(PlayerState.OnRightWall, (current, player) =>
         {
-            if (Input.IsActionPressed("ui_left"))
+            if (_input.IsActionPressed(InputActions.MoveLeft))
             {
                 var jump = new Vector2(HorizontalSpeed * -1, -JumpForce);
                 GlobalVelocity = jump;
@@ -113,9 +128,9 @@ public class Player : KinematicBody2D
             }
             return current;
         });
-        _fsm.Add(PlayerState.OnLeftWall, (current, delta) =>
+        _fsm.Add(PlayerState.OnLeftWall, (current, player) =>
         {
-            if (Input.IsActionJustPressed("ui_up"))
+            if (_input.IsActionJustPressed(InputActions.Jump))
             {
                 var jump = new Vector2(WallJumpHorizontalForce, -JumpForce);
                 GlobalVelocity = jump;
@@ -124,9 +139,9 @@ public class Player : KinematicBody2D
             }
             return current;
         });
-        _fsm.Add(PlayerState.OnRightWall, (current, delta) =>
+        _fsm.Add(PlayerState.OnRightWall, (current, player) =>
         {
-            if (Input.IsActionJustPressed("ui_up"))
+            if (_input.IsActionJustPressed(InputActions.Jump))
             {
                 var jump = new Vector2(WallJumpHorizontalForce * -1, -JumpForce);
                 GlobalVelocity = jump;
@@ -146,7 +161,7 @@ public class Player : KinematicBody2D
 
     public override void _PhysicsProcess(float delta)
     {
-        _fsm.Tick(delta);
+        _fsm.Tick(this);
         GlobalVelocity = MoveAndSlide(GlobalVelocity, FloorNormal);
         _wallTime = Mathf.Clamp(_wallTime - delta, 0, 10);
     }
