@@ -20,13 +20,13 @@ namespace MaquinaDeEstados.BT
     /// Usar este nodo si el estado requerido debe ser State.Success en todos los nodos de la secuencia
     /// </summary>
     /// <typeparam name="TContext"></typeparam>
-    public class Sequense<TContext> : Node<TContext> where TContext : class
+    public class Sequence<TContext> : Node<TContext> where TContext : class
     {
         protected IList<Node<TContext>> _children;
         protected int _currentIndex;
-        public Sequense()
+        public Sequence(params Node<TContext>[] nodes)
         {
-            _children = new List<Node<TContext>>();
+            _children = nodes;
         }
         public override Status Tick(TContext context)
         {
@@ -59,6 +59,10 @@ namespace MaquinaDeEstados.BT
     {
         protected IList<Node<TContext>> _children;
         protected int _currentIndex;
+        public Selector(params Node<TContext>[] nodes)
+        {
+            _children = nodes;
+        }
         public override Status Tick(TContext context)
         {
             var state = _children[_currentIndex % _children.Count].Tick(context);
@@ -121,10 +125,10 @@ namespace MaquinaDeEstados.BT
             return Status.Prossess;
         }
     }
-    public class Caller<TContext> : Node<TContext> where TContext : class
+    public class Call<TContext> : Node<TContext> where TContext : class
     {
         protected Action<TContext> _callable;
-        public Caller(Action<TContext> callable)
+        public Call(Action<TContext> callable)
         {
             _callable = callable;
         }
@@ -132,6 +136,18 @@ namespace MaquinaDeEstados.BT
         {
             _callable(context);
             return Status.Success;
+        }
+    }
+    public class LeafFunction<TContext> : Node<TContext> where TContext : class
+    {
+        protected Func<TContext, Status> _function;
+        public LeafFunction(Func<TContext, Status> function)
+        {
+            _function = function;
+        }
+        public override Status Tick(TContext context)
+        {
+            return _function(context);
         }
     }
     public class Condition<TContext> : Node<TContext> where TContext : class
@@ -168,6 +184,41 @@ namespace MaquinaDeEstados.BT
                     return Status.Success;                
             }
             return Status.Prossess;
+        }
+    }
+    public static class BtExtension
+    {
+        public static Node<TContext> Sequense<TContext>(this Root<TContext> root, params Node<TContext>[] nodes) where TContext : class
+        {
+            return new Sequence<TContext>(nodes);
+        }
+        public static Node<TContext> Select<TContext>(this Root<TContext> root, params Node<TContext>[] nodes) where TContext : class
+        {
+            return new Sequence<TContext>(nodes);
+        }
+        public static Node<TContext> Invert<TContext>(this Root<TContext> root, Node<TContext> node) where TContext : class
+        {
+            return new Invert<TContext>(node);
+        }
+        public static Node<TContext> Wait<TContext>(this Root<TContext> root, float seconds) where TContext : class
+        {
+            return new Wait<TContext>(seconds);
+        }
+        public static Node<TContext> Call<TContext>(this Root<TContext> root, Action<TContext> callable) where TContext : class
+        {
+            return new Call<TContext>(callable);
+        }
+        public static Node<TContext> Function<TContext>(this Root<TContext> root, Func<TContext, Node<TContext>.Status> function) where TContext : class
+        {
+            return new LeafFunction<TContext>(function);
+        }
+        public static Node<TContext> Condition<TContext>(this Root<TContext> root, Func<TContext, bool> condition) where TContext : class
+        {
+            return new Condition<TContext>(condition);
+        }
+        public static Node<TContext> Sub<TContext>(this Root<TContext> root, Node<TContext> node) where TContext : class
+        {
+            return node;
         }
     }
 }
