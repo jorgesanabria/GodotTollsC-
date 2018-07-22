@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MaquinaDeEstados.InputHandler
 {
-    public class InputHandler<TEnum, TMap>
+    public class InputHandler<TEnum, TMap> : IInputHandler<TEnum>
     {
         protected readonly bool _multiple;
         protected IDictionary<TEnum, TMap> _map;

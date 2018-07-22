@@ -52,6 +52,9 @@
     <Compile Include="FSM\FiniteStateMachine.cs" />
     <Compile Include="FSM\Fsm.cs" />
     <Compile Include="InputActions.cs" />
+    <Compile Include="InputHandler\AIInputHandler.cs" />
+    <Compile Include="InputHandler\IAIInputHandler.cs" />
+    <Compile Include="InputHandler\IInputHandler.cs" />
     <Compile Include="InputHandler\InputHandler.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PlayerState.cs" />
