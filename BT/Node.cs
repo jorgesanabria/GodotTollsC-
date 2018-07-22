@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MaquinaDeEstados.BT
 {
@@ -109,17 +106,18 @@ namespace MaquinaDeEstados.BT
     public class Wait<TContext> : Node<TContext> where TContext : class
     {
         protected float _waitTime;
-        protected DateTime? _lastTime;
+        protected float _acumulated;
+        protected DateTime? _startTime;
         public Wait(float secons)
         {
             _waitTime = secons;
         }
         public override Status Tick(TContext context)
         {
-            if (!_lastTime.HasValue) _lastTime = DateTime.Now;
-            if ((DateTime.Now - _lastTime.Value).Seconds >= _waitTime)
+            if (!_startTime.HasValue) _startTime = DateTime.Now.AddSeconds(_waitTime);
+            if (DateTime.Now >= _startTime.Value)
             {
-                _lastTime = null;
+                _startTime = null;
                 return Status.Success;
             }
             return Status.Prossess;
@@ -167,9 +165,9 @@ namespace MaquinaDeEstados.BT
     {
         protected IList<Node<TContext>> _children;
         protected int _currentIndex;
-        public Root()
+        public Root(params Node<TContext>[] nodes)
         {
-            _children = new List<Node<TContext>>();
+            _children = nodes;
         }
         public override Status Tick(TContext context)
         {
@@ -180,7 +178,7 @@ namespace MaquinaDeEstados.BT
                     _currentIndex = 0;
                     return Status.Failure;
                 case Status.Success:
-                    _currentIndex = _currentIndex < _children.Count ? _currentIndex++ : 0;
+                    _currentIndex = _currentIndex < _children.Count ? _currentIndex + 1 : 0;
                     return Status.Success;                
             }
             return Status.Prossess;
@@ -219,6 +217,13 @@ namespace MaquinaDeEstados.BT
         public static Node<TContext> Sub<TContext>(this Root<TContext> root, Node<TContext> node) where TContext : class
         {
             return node;
+        }
+    }
+    public static class Bt
+    {
+        public static Root<TContext> Root<TContext>(params Node<TContext>[] nodes) where TContext : class
+        {
+            return new Root<TContext>(nodes);
         }
     }
 }

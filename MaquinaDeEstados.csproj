@@ -57,6 +57,7 @@
     <Compile Include="InputHandler\IAIInputHandler.cs" />
     <Compile Include="InputHandler\IInputHandler.cs" />
     <Compile Include="InputHandler\InputHandler.cs" />
+    <Compile Include="Malo.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PlayerState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
