@@ -5,7 +5,7 @@ using MaquinaDeEstados.FSM;
 using MaquinaDeEstados.InputHandler;
 using System;
 
-public class Malo : KinematicBody2D
+public class Malo : KinematicBody2D, IDamagable
 {
     [Export]
     public Vector2 GravityVector = new Vector2(0f, 9.8f);
@@ -22,11 +22,15 @@ public class Malo : KinematicBody2D
     private float _wallTime = 0f;
     [Export]
     public float WallTime = 0.5f;
+    [Export]
+    public NodePath TextPath;
+    RichTextLabel _textLabel;
     protected FiniteStateMachine<PlayerState, Malo> _fsm;
     protected AIInputHandler<InputActions> _input;
     protected Root<Malo> _bt;
     public override void _Ready()
     {
+        _textLabel = GetNode(TextPath) as RichTextLabel;
         _input = new AIInputHandler<InputActions>();
         _fsm = new FiniteStateMachine<PlayerState, Malo>(equalizer: (current, captured) => current == captured) { InitialState = PlayerState.OnAir };
         _fsm.Add(PlayerState.OnAir, (current, player) =>
@@ -142,20 +146,29 @@ public class Malo : KinematicBody2D
             return current;
         });
         _bt = Bt.Root(
-            _bt.Call(x => {
-                if (x.IsOnWall() && x._getCollisionNormal() == Vector2.Right)
+            _bt.Function(x => {
+                if (!x.IsOnWall() || x.IsOnWall() && x._getCollisionNormal() == Vector2.Left)
                 {
-                    x._input.SetActionReleased(InputActions.MoveLeft);
-                    x._input.SetActionPressed(InputActions.MoveRight);
-                }
-                else if (x.IsOnWall() && x._getCollisionNormal() == Vector2.Left)
-                {
-                    x._input.SetActionReleased(InputActions.MoveRight);
                     x._input.SetActionPressed(InputActions.MoveLeft);
+                    return Node<Malo>.Status.Prossess;
                 }
                 else
                 {
-                    x._input.SetActionPressed(InputActions.MoveLeft);
+                    x._input.SetActionReleased(InputActions.MoveLeft);
+                    return Node<Malo>.Status.Success;
+                }
+            }),
+            _bt.Wait(5f),
+            _bt.Function(x => {
+                if (!x.IsOnWall() || x.IsOnWall() && x._getCollisionNormal() == Vector2.Right)
+                {
+                    x._input.SetActionPressed(InputActions.MoveRight);
+                    return Node<Malo>.Status.Prossess;
+                }
+                else
+                {
+                    x._input.SetActionReleased(InputActions.MoveRight);
+                    return Node<Malo>.Status.Success;
                 }
             }),
             _bt.Wait(5f)
@@ -176,4 +189,15 @@ public class Malo : KinematicBody2D
         _wallTime = Mathf.Clamp(_wallTime - delta, 0, 10);
         _bt.Tick(this);
     }
+    int _life = 100;
+    public void Damage()
+    {
+        GD.Print("estoy lastimado");
+        _life -= 10;
+        _textLabel.Text = $"Vida {_life}";
+    }
+}
+public interface IDamagable
+{
+    void Damage();
 }

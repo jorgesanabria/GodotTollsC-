@@ -24,14 +24,20 @@ public class Player : KinematicBody2D
     public float WallTime = 0.5f;
     protected FiniteStateMachine<PlayerState, Player> _fsm;
     protected InputHandler<InputActions, string> _input;
+    [Export]
+    public NodePath WeaponNode;
+    [Export]
+    public NodePath CollisionWeaponNode;
     public override void _Ready()
     {
+        var areaWaepon = GetNode(WeaponNode) as Area2D;
         _input = new InputHandler<InputActions, string>(
             map: new Dictionary<InputActions, string>
             {
                 { InputActions.MoveLeft, "ui_left" },
                 { InputActions.MoveRight, "ui_right" },
-                { InputActions.Jump, "ui_up" }
+                { InputActions.Jump, "ui_up" },
+                { InputActions.Attack, "ui_accept" }
             },
             actionJustPressed: Input.IsActionJustPressed,
             actionPressed: Input.IsActionPressed,
@@ -69,6 +75,18 @@ public class Player : KinematicBody2D
                 horizontal = new Vector2((HorizontalSpeed), GlobalVelocity.y);
             }
             GlobalVelocity = horizontal;
+            return current;
+        });
+        _fsm.Add(PlayerState.OnGround, (current, player) =>
+        {
+            if (_input.IsActionJustPressed(InputActions.MoveLeft))
+            {
+                areaWaepon.Transform = areaWaepon.Transform.Inverse();
+            }
+            if (_input.IsActionJustPressed(InputActions.MoveRight))
+            {
+                areaWaepon.Transform = areaWaepon.Transform.Inverse();
+            }
             return current;
         });
         _fsm.Add(PlayerState.OnAir, (current, player) =>
@@ -147,6 +165,19 @@ public class Player : KinematicBody2D
                 GlobalVelocity = jump;
                 _wallTime = WallTime;
                 return PlayerState.OnAir;
+            }
+            return current;
+        });
+        _fsm.Add(PlayerState.OnGround, (current, player) =>
+        {
+            if (_input.IsActionJustPressed(InputActions.Attack))
+            {
+                var collisions = areaWaepon.GetOverlappingBodies();
+                //GD.Print(collisions);
+                foreach (var collision in collisions)
+                {
+                    if (collision is IDamagable) ((IDamagable)collision).Damage();
+                }
             }
             return current;
         });

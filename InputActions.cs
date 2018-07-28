@@ -4,6 +4,7 @@
     {
         MoveLeft,
         MoveRight,
-        Jump
+        Jump,
+        Attack
     }
 }
