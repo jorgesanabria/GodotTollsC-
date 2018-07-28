@@ -1,0 +1,100 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://Levels/Player.tscn" type="PackedScene" id=1]
+
+[sub_resource type="RectangleShape2D" id=1]
+
+custom_solver_bias = 0.0
+extents = Vector2( 1570.51, 10 )
+
+[sub_resource type="RectangleShape2D" id=2]
+
+custom_solver_bias = 0.0
+extents = Vector2( 10, 576.489 )
+
+[sub_resource type="RectangleShape2D" id=3]
+
+custom_solver_bias = 0.0
+extents = Vector2( 354.494, 10 )
+
+[sub_resource type="RectangleShape2D" id=4]
+
+custom_solver_bias = 0.0
+extents = Vector2( 28.2519, 37.4447 )
+
+[node name="Main" type="Node2D" index="0"]
+
+__meta__ = {
+"_edit_horizontal_guides_": [ 444.788 ]
+}
+
+[node name="Platforms" type="Node2D" parent="." index="0"]
+
+editor/display_folded = true
+position = Vector2( 502.617, 327.603 )
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Platforms" index="0"]
+
+editor/display_folded = true
+position = Vector2( -2.51746, 234.131 )
+input_pickable = false
+collision_layer = 1
+collision_mask = 1
+constant_linear_velocity = Vector2( 0, 0 )
+constant_angular_velocity = 0.0
+friction = 1.0
+bounce = 0.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/StaticBody2D" index="0"]
+
+shape = SubResource( 1 )
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Platforms/StaticBody2D" index="1"]
+
+position = Vector2( -1552.56, -565.253 )
+shape = SubResource( 2 )
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Platforms/StaticBody2D" index="2"]
+
+position = Vector2( 1555.38, -572.103 )
+shape = SubResource( 2 )
+
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="Platforms/StaticBody2D" index="3"]
+
+position = Vector2( 23.6594, -179.155 )
+shape = SubResource( 3 )
+
+[node name="CollisionShape2D5" type="CollisionShape2D" parent="Platforms/StaticBody2D" index="4"]
+
+position = Vector2( 777.123, -316.551 )
+shape = SubResource( 3 )
+
+[node name="CollisionShape2D6" type="CollisionShape2D" parent="Platforms/StaticBody2D" index="5"]
+
+position = Vector2( -30.9512, -37.4673 )
+shape = SubResource( 4 )
+
+[node name="CollisionShape2D7" type="CollisionShape2D" parent="Platforms/StaticBody2D" index="6"]
+
+position = Vector2( -281.407, -223.412 )
+shape = SubResource( 4 )
+
+[node name="CollisionShape2D8" type="CollisionShape2D" parent="Platforms/StaticBody2D" index="7"]
+
+position = Vector2( 333.348, -219.617 )
+shape = SubResource( 4 )
+
+[node name="CollisionShape2D9" type="CollisionShape2D" parent="Platforms/StaticBody2D" index="8"]
+
+position = Vector2( 469.96, -344.845 )
+shape = SubResource( 4 )
+
+[node name="Player" parent="." index="1" instance=ExtResource( 1 )]
+
+GravityVector = Vector2( 0, 30 )
+HorizontalSpeed = 300.0
+JumpForce = 600.0
+WallTime = 0.2
+CollisionWeaponNode = null
+
+
