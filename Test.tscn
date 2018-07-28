@@ -94,7 +94,7 @@ shape = SubResource( 4 )
 GravityVector = Vector2( 0, 30 )
 HorizontalSpeed = 300.0
 JumpForce = 600.0
-WallTime = 0.2
+WallTime = 0.1
 CollisionWeaponNode = null
 
 

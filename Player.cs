@@ -25,12 +25,9 @@ public class Player : KinematicBody2D
     protected FiniteStateMachine<PlayerState, Player> _fsm;
     protected InputHandler<InputActions, string> _input;
     [Export]
-    public NodePath WeaponNode;
-    [Export]
     public NodePath CollisionWeaponNode;
     public override void _Ready()
     {
-        var areaWaepon = GetNode(WeaponNode) as Area2D;
         _input = new InputHandler<InputActions, string>(
             map: new Dictionary<InputActions, string>
             {
@@ -77,18 +74,6 @@ public class Player : KinematicBody2D
             GlobalVelocity = horizontal;
             return current;
         });
-        _fsm.Add(PlayerState.OnGround, (current, player) =>
-        {
-            if (_input.IsActionJustPressed(InputActions.MoveLeft))
-            {
-                areaWaepon.Transform = areaWaepon.Transform.Inverse();
-            }
-            if (_input.IsActionJustPressed(InputActions.MoveRight))
-            {
-                areaWaepon.Transform = areaWaepon.Transform.Inverse();
-            }
-            return current;
-        });
         _fsm.Add(PlayerState.OnAir, (current, player) =>
         {
             if (_wallTime > 0) return current;
@@ -124,9 +109,10 @@ public class Player : KinematicBody2D
             }
             return current;
         });
-        _fsm.Add(PlayerState.OnLeftWall, (current, delta) => IsOnFloor() ? PlayerState.OnGround : current);
-        _fsm.Add(PlayerState.OnRightWall, (current, delta) => IsOnFloor() ? PlayerState.OnGround : current);
-        _fsm.Add(PlayerState.OnLeftWall, (current, delta) =>
+        _fsm.Add(PlayerState.OnLeftWall, (current, player) => IsOnFloor() ? PlayerState.OnGround : current);
+        _fsm.Add(PlayerState.OnRightWall, (current, player) => IsOnFloor() ? PlayerState.OnGround : current);
+        _fsm.Add(PlayerState.OnGround, (current, player) => !IsOnFloor() ? PlayerState.OnAir : current);
+        _fsm.Add(PlayerState.OnLeftWall, (current, player) =>
         {
             if (_input.IsActionPressed(InputActions.MoveRight))
             {
@@ -138,6 +124,10 @@ public class Player : KinematicBody2D
         });
         _fsm.Add(PlayerState.OnRightWall, (current, player) =>
         {
+            if (!_input.IsActionPressed(InputActions.MoveRight))
+            {
+                return PlayerState.OnAir;
+            }
             if (_input.IsActionPressed(InputActions.MoveLeft))
             {
                 var jump = new Vector2(HorizontalSpeed * -1, -JumpForce);
@@ -148,6 +138,10 @@ public class Player : KinematicBody2D
         });
         _fsm.Add(PlayerState.OnLeftWall, (current, player) =>
         {
+            if (!_input.IsActionPressed(InputActions.MoveLeft))
+            {
+                return PlayerState.OnAir;
+            }
             if (_input.IsActionJustPressed(InputActions.Jump))
             {
                 var jump = new Vector2(WallJumpHorizontalForce, -JumpForce);
@@ -165,19 +159,6 @@ public class Player : KinematicBody2D
                 GlobalVelocity = jump;
                 _wallTime = WallTime;
                 return PlayerState.OnAir;
-            }
-            return current;
-        });
-        _fsm.Add(PlayerState.OnGround, (current, player) =>
-        {
-            if (_input.IsActionJustPressed(InputActions.Attack))
-            {
-                var collisions = areaWaepon.GetOverlappingBodies();
-                //GD.Print(collisions);
-                foreach (var collision in collisions)
-                {
-                    if (collision is IDamagable) ((IDamagable)collision).Damage();
-                }
             }
             return current;
         });
